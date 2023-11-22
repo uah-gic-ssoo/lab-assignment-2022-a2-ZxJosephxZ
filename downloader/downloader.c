@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
       to = REMOTE_TARGET_SIZE_IN_BYTES;
     }
 
-    /**
+     /**
      * TODO: Create a child process that will:
      *   - Print a message showing what part it will download (mostly for
      *   debugging purposes (i.e. printf("\t chunk #%d: Range %d-%d \n", i,
@@ -71,6 +71,23 @@ int main(int argc, char* argv[]) {
      *   - Call download_fragment(TARGET_URL, from, to, outfile);
      *   - exit(0);
      */
+    char outfile[50];
+    sprintf(outfile, "%s--%d", CHUNK_FILENAME_PREFIX, i);
+    pid = fork();
+    if (pid < 0)
+    {
+        perror("");
+        exit(1);
+    }
+    else if (pid == 0)
+    {
+      download_fragment(TARGET_URL,from,to,outfile);
+      exit(0);
+    }
+    else
+    {
+      
+
 
     if (download_mode == 'S') {
       /**
@@ -78,14 +95,19 @@ int main(int argc, char* argv[]) {
        * downloading the current chunk if the download mode is S
        * (sequential)
        */
+      wait(NULL);
     }
   }
-
+}
   if (download_mode == 'P') {
     /**
      * TODO: wait until all the downloads have finished if the download mode
      * is P (parallel)
      */
+    for(int i = 0; i < num_processes; i++)
+    {
+      wait(NULL);
+    }
   }
   printf("-- End downloader --\n");
 }
