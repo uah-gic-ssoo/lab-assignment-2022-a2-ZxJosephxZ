@@ -70,6 +70,8 @@ int main(int argc, char* argv[]) {
      *       sprintf(outfile, "%s-%d", CHUNK_FILENAME_PREFIX, i);
      *   - Call download_fragment(TARGET_URL, from, to, outfile);
      *   - exit(0);
+     *  -sprintf is implemented to format and replace a string in the outfile
+     *    array. For creating unique file names for each requested download fragment.
      */
     char outfile[50];
     sprintf(outfile, "%s--%d", CHUNK_FILENAME_PREFIX, i);
