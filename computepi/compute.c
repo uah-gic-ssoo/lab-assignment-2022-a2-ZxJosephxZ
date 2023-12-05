@@ -3,7 +3,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <time.h>
 /* Number of hits */
 unsigned int hits;
 
@@ -19,13 +19,30 @@ void *thread_function(void *data) {
   /* The local variable that shall be used to store the number of points within
    * the circular section */
   int count = 0;
+  double aleatorio;
+  struct drand48_data rand_buffer;
+  srand48_r(time(NULL), &rand_buffer);
 
   /* TODO: Implement the loop that obtains the random points and counts how
    * many of those lay within the circumference of radius 1 */
 
   /* TODO: Add the count to the global variable hits in mutual exclusion */
-  hits = hits + count;
+  for (int i = 0; i < points; ++i) {
+    drand48_r(&rand_buffer, &aleatorio);
+    double x = aleatorio;
+    
+    drand48_r(&rand_buffer, &aleatorio);
+    double y = aleatorio;
 
+    double distance = x * x + y * y;
+
+    if (distance <= 1.0) {
+      count++;
+    }
+  }
+  pthread_mutex_lock(&mutex);
+  hits += count;
+  pthread_mutex_unlock(&mutex);
   return NULL;
 }
 
@@ -43,4 +60,17 @@ void compute(int npoints, int nthreads) {
    * printf("%.8f\n", VALUE_OF_PI);
    * where VALUE_OF_PI is the floating-point value to be printed.
    */
+  pthread_t threads[nthreads];
+  int points_per_thread = npoints / nthreads;
+
+  for (int i = 0; i < nthreads; ++i) {
+    pthread_create(&threads[i], NULL, thread_function, &points_per_thread);
+  }
+
+  /* Wait for all threads to finish */
+  for (int i = 0; i < nthreads; ++i) {
+    pthread_join(threads[i], NULL);
+  }
+  double ratio = (double)hits / npoints;
+  printf("%.8f\n", 4.0 * ratio);
 }
